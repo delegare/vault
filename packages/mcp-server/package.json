@@ -1,0 +1,93 @@
+{
+  "name": "@delegare/mcp-server",
+  "version": "1.1.0",
+  "description": "Delegare is a delegated payment protocol for AI agents. It allows users to set spending limits and authorize agents to pay on their behalf using fiat or crypto.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "mcp": {
+    "title": "Delegare Payments",
+    "description": "Delegated payment protocol for AI agents. Allows setting spending limits and authorizing payments.",
+    "homepage": "https://delegare.dev",
+    "icon": "https://delegare.dev/logo.png",
+    "environmentVariables": {
+      "API_BASE_URL": {
+        "description": "The base URL for the Delegare API (defaults to production)",
+        "default": "https://api.delegare.dev",
+        "required": false
+      },
+      "VAULT_URL": {
+        "description": "The URL for the internal Vault service",
+        "default": "http://localhost:3000",
+        "required": false
+      },
+      "ENVIRONMENT": {
+        "description": "The deployment environment (dev, sandbox, production)",
+        "default": "dev",
+        "required": false
+      },
+      "AWS_REGION": {
+        "description": "AWS region for internal services",
+        "default": "us-east-1",
+        "required": false
+      },
+      "PORT": {
+        "description": "The port the MCP server should listen on",
+        "default": "3001",
+        "required": false
+      }
+    }
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./middleware": {
+      "types": "./dist/middleware.d.ts",
+      "import": "./dist/middleware.js",
+      "require": "./dist/middleware.js",
+      "default": "./dist/middleware.js"
+    }
+  },
+  "scripts": {
+    "dev": "skybridge dev",
+    "build": "pnpm run web:build && pnpm run build:server",
+    "build:server": "esbuild src/index.ts src/middleware.ts src/express-server.ts --bundle --platform=node --format=cjs --outdir=dist --external:skybridge --external:zod --external:@modelcontextprotocol/sdk --external:express --external:cors --external:pino --external:vite",
+    "web:build": "vite build",
+    "start": "node dist/express-server.js",
+    "inspector": "mcp-inspector http://localhost:3001/mcp",
+    "dev:desktop": "tsx src/express-server.ts",
+    "test:desktop": "node dist/express-server.js"
+  },
+  "dependencies": {
+    "@aws-amplify/ui-react": "^6.15.2",
+    "@modelcontextprotocol/sdk": "^1.0.4",
+    "aws-amplify": "^6.16.3",
+    "axios": "^1.7.9",
+    "cors": "^2.8.5",
+    "express": "^5.2.1",
+    "pino": "^10.3.1",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "skybridge": "0.35.15",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@modelcontextprotocol/inspector": "^0.18.0",
+    "@skybridge/devtools": ">=0.35.14 <1.0.0",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.6",
+    "@types/node": "^24.12.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^4.3.0",
+    "esbuild": "^0.27.4",
+    "nodemon": "^3.1.11",
+    "pino-pretty": "^13.1.3",
+    "tsx": "^4.21.0",
+    "typescript": "^5.4.0",
+    "vite": "^7.3.1"
+  }
+}

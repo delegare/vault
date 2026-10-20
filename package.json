@@ -1,0 +1,88 @@
+{
+  "name": "@delegare/vault",
+  "version": "0.1.0",
+  "packageManager": "pnpm@10.28.0",
+  "private": true,
+  "description": "Delegare vault service \u2014 trustless agent payment authorization",
+  "main": "dist/app.js",
+  "scripts": {
+    "build": "tsc && pnpm --filter @delegare/mcp-server build",
+    "start": "node dist/app.js",
+    "dev": "ts-node --transpile-only src/app.ts",
+    "test": "jest --passWithNoTests",
+    "lint": "tsc --noEmit",
+    "migrate:session-keys": "ts-node --transpile-only scripts/migrate-session-keys-to-kms.ts"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "3.600.0",
+    "@aws-sdk/client-kms": "3.1030.0",
+    "@aws-sdk/client-secrets-manager": "3.600.0",
+    "@aws-sdk/client-ses": "3.1024.0",
+    "@aws-sdk/client-sqs": "3.1024.0",
+    "@aws-sdk/lib-dynamodb": "3.600.0",
+    "@delegare/mcp-server": "workspace:*",
+    "@x402/core": "2.11.0",
+    "@x402/evm": "2.11.0",
+    "@x402/fetch": "2.11.0",
+    "aws-jwt-verify": "5.1.1",
+    "cors": "2.8.6",
+    "express": "4.21.0",
+    "jose": "6.2.2",
+    "pino": "10.3.1",
+    "pino-http": "11.0.0",
+    "stripe": "16.0.0",
+    "viem": "2.21.0",
+    "zod": "3.25.76"
+  },
+  "devDependencies": {
+    "@modelcontextprotocol/sdk": "1.29.0",
+    "@types/cors": "2.8.19",
+    "@types/eventsource": "3.0.0",
+    "@types/express": "4.17.21",
+    "@types/jest": "29.0.0",
+    "@types/node": "22.19.15",
+    "@types/supertest": "6.0.3",
+    "eventsource": "4.1.0",
+    "jest": "29.0.0",
+    "next": "16.2.6",
+    "skybridge": "0.35.15",
+    "supertest": "7.2.2",
+    "ts-jest": "29.0.0",
+    "ts-node": "10.9.0",
+    "typescript": "5.9.3"
+  },
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": []
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "node",
+    "transform": {
+      "^.+\\.tsx?$": [
+        "ts-jest",
+        {
+          "tsconfig": "<rootDir>/packages/mcp-server/tsconfig.json"
+        }
+      ],
+      "^.+\\.(js|jsx|cjs|mjs)$": "<rootDir>/jest.esm-transform.cjs"
+    },
+    "moduleNameMapper": {
+      "^(\\.{1,2}/.*)\\.js$": "$1",
+      "^skybridge/(.*)$": "<rootDir>/packages/mcp-server/e2e/__mocks__/skybridge/$1",
+      "^@delegare/mcp-server/(.*)$": "<rootDir>/packages/mcp-server/src/$1",
+      "^@delegare/mcp-server$": "<rootDir>/packages/mcp-server/src",
+      "^@modelcontextprotocol/sdk/(.*)\\.js$": "@modelcontextprotocol/sdk/$1"
+    },
+    "transformIgnorePatterns": [
+      "/node_modules/(?!(@modelcontextprotocol/sdk|skybridge|jose)/)"
+    ],
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "<rootDir>/apps/dashboard/e2e/",
+      "<rootDir>/packages/mcp-server/e2e/"
+    ]
+  }
+}

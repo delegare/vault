@@ -1,0 +1,168 @@
+{
+  "$schema": "https://developers.openai.com/apps-sdk/schemas/chatgpt-app-submission.v1.json",
+  "schema_version": 1,
+  "app_info": {
+    "display_name": "Delegare Payments",
+    "subtitle": "Agent payment authorization",
+    "description": "Delegare lets users set spending limits and authorize AI agents to make payments on their behalf using fiat or crypto. Users grant a bounded spending mandate, agents then pay merchants, Delegare handles, or on-chain wallets within those limits and can fetch x402 paywalled resources with automatic payment. Users can check their remaining allowance, and merchants can review their payment statistics.",
+    "category": "FINANCE"
+  },
+  "tools": {
+    "execute_fetch": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": true,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Can automatically execute an x402 payment when an intent mandate is supplied to retrieve a paid resource, so it changes state rather than only reading.",
+        "open_world_justification": "Fetches arbitrary external URLs and can pay third-party merchants over the public internet.",
+        "destructive_justification": "Any payment it makes is an additive charge bounded by the user's pre-authorized mandate and does not delete, overwrite, or revoke access."
+      }
+    },
+    "request_payment_authorization": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": true,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Creates a new spending mandate for the user, which changes account state.",
+        "open_world_justification": "Provisions spending authority that can later move money to external recipients and returns an externally hosted setup link.",
+        "destructive_justification": "Only creates a new, revocable spending mandate and does not delete, overwrite, or revoke existing authorizations."
+      }
+    },
+    "poll_setup_session": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": true,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Only reads the status of a pending mandate setup and returns the finalized mandate when complete, without modifying data.",
+        "open_world_justification": "Reports on an authorization flow tied to connecting external payment methods.",
+        "destructive_justification": "Only reads setup status and never deletes, overwrites, or revokes anything."
+      }
+    },
+    "get_balance": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": true,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Only retrieves the remaining spending allowance and limits for a mandate without changing anything.",
+        "open_world_justification": "Reads balance data for a mandate that governs spending on external payment rails.",
+        "destructive_justification": "Only reads allowance data and performs no deletions, overwrites, or revocations."
+      }
+    },
+    "pay_merchant": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": true,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Executes a payment to a merchant, handle, or wallet, which changes account and ledger state.",
+        "open_world_justification": "Sends real money to external merchants, Delegare handles, or on-chain crypto wallets over public networks.",
+        "destructive_justification": "Each payment is an additive charge bounded by the user's pre-authorized mandate and does not delete, overwrite, or revoke access."
+      }
+    },
+    "get_merchant_stats": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": true,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Only retrieves performance statistics for the merchant account without modifying data.",
+        "open_world_justification": "Reads aggregated payment statistics derived from external transaction activity.",
+        "destructive_justification": "Only reads reporting data and performs no deletions, overwrites, or revocations."
+      }
+    }
+  },
+  "test_cases": [
+    {
+      "description": "Set up a spending authorization with per-transaction and monthly limits.",
+      "user_prompt": "Let my assistant spend up to $20 per purchase and $100 a month on my behalf.",
+      "file_attachment_urls": null,
+      "tools_triggered": "request_payment_authorization",
+      "expected_output": "Returns either a setup link for the user to connect a payment method or, if a covering mandate already exists, a ready-to-use intent mandate within the requested limits.",
+      "expected_output_url": null
+    },
+    {
+      "description": "Wait for the user to finish the browser-based payment setup and retrieve the finalized mandate.",
+      "user_prompt": "I've clicked the link and connected my card — are we good to go?",
+      "file_attachment_urls": null,
+      "tools_triggered": "poll_setup_session",
+      "expected_output": "Reports the setup status as pending, complete, or expired, and returns the finalized intent mandate once the user has completed the flow.",
+      "expected_output_url": null
+    },
+    {
+      "description": "Make a payment to a merchant within the authorized limits.",
+      "user_prompt": "Pay sunny-violet-panda $5 for the design assets.",
+      "file_attachment_urls": null,
+      "tools_triggered": "pay_merchant",
+      "expected_output": "Confirms a successful payment for the requested amount and returns a receipt with status, and a transaction reference when settled on-chain.",
+      "expected_output_url": null
+    },
+    {
+      "description": "Check how much spending allowance remains for the current period.",
+      "user_prompt": "How much of my monthly budget is left?",
+      "file_attachment_urls": null,
+      "tools_triggered": "get_balance",
+      "expected_output": "Returns the remaining monthly allowance along with the configured monthly and per-transaction limits.",
+      "expected_output_url": null
+    },
+    {
+      "description": "Fetch a paywalled resource and automatically settle the x402 payment using the mandate.",
+      "user_prompt": "Get me the data from this x402-protected API endpoint using my spending authorization.",
+      "file_attachment_urls": null,
+      "tools_triggered": "execute_fetch",
+      "expected_output": "Returns the fetched resource content and indicates whether an automatic x402 payment was executed, including a transaction reference when one occurred.",
+      "expected_output_url": null
+    },
+    {
+      "description": "Review aggregate payment performance for a merchant account.",
+      "user_prompt": "Show me my Delegare merchant stats.",
+      "file_attachment_urls": null,
+      "tools_triggered": "get_merchant_stats",
+      "expected_output": "Returns total payment volume and transaction count for the merchant's reporting period.",
+      "expected_output_url": null
+    }
+  ],
+  "negative_test_cases": [
+    {
+      "description": "Do not trigger for unrelated general-knowledge questions.",
+      "user_prompt": "What's the weather going to be like in Berlin this weekend?",
+      "file_attachment_urls": null,
+      "tools_triggered": null,
+      "expected_output": "The app should not be invoked because the request is unrelated to delegated payments.",
+      "expected_output_url": null
+    },
+    {
+      "description": "Do not trigger for ordinary bank account transfers, which are outside the agent-payment workflow.",
+      "user_prompt": "Transfer $500 from my checking account to my savings account.",
+      "file_attachment_urls": null,
+      "tools_triggered": null,
+      "expected_output": "The app should not be invoked because it authorizes agent payments to merchants and wallets, not bank-to-bank transfers.",
+      "expected_output_url": null
+    },
+    {
+      "description": "Do not trigger for market-data or price lookups that involve no payment.",
+      "user_prompt": "What's the current price of Bitcoin in USD?",
+      "file_attachment_urls": null,
+      "tools_triggered": null,
+      "expected_output": "The app should not be invoked because the request is a read-only price lookup outside its supported workflows.",
+      "expected_output_url": null
+    },
+    {
+      "description": "Do not trigger for software-integration or coding requests.",
+      "user_prompt": "Write me a Node.js script that integrates the Stripe API.",
+      "file_attachment_urls": null,
+      "tools_triggered": null,
+      "expected_output": "The app should not be invoked because it executes delegated payments rather than generating integration code.",
+      "expected_output_url": null
+    }
+  ]
+}

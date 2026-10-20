@@ -1,0 +1,1 @@
+/Users/tobiaspfuetze/Development/vault/packages/mcp-server/vite.config.ts

@@ -1,0 +1,17 @@
+{
+  "name": "@delegare/contracts",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "forge build",
+    "test": "forge test",
+    "format": "forge fmt",
+    "deploy:sepolia": "TESTNET=true forge script script/DeployRouter.s.sol:DeployRouter --rpc-url https://sepolia.base.org --broadcast --verify",
+    "deploy:mainnet": "forge script script/DeployRouter.s.sol:DeployRouter --rpc-url https://mainnet.base.org --broadcast --verify"
+  },
+  "devDependencies": {
+    "@openzeppelin/contracts": "^5.0.2",
+    "hardhat": "^3.3.0"
+  },
+  "type": "module"
+}
